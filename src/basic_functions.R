@@ -56,7 +56,7 @@ node_value =function(option, vu, vd, p, node_payoff){
         price = p * vu + (1-p) * vd
     }else if(option$TypeContinent == 'America'){
         price = max(p * vu + (1-p) * vd, node_payoff)
-        if(node_payoff >= p * vu + (1-p) * vd){
+        if(node_payoff > p * vu + (1-p) * vd){
             price_moment = 1
         }
     }
@@ -85,7 +85,7 @@ make_tree = function(option){
     moment_tree = list()
     price_tree = list()
     price_tree[[1]] = branch_payoffs(option, depth)
-    moment_tree[[1]] = rep(1, depth)
+    moment_tree[[1]] = rep(0, depth)
     for(k in 2:(depth+1)){
         branch_profits_and_moments = branch_value(option, price_tree[[k-1]], branch_payoffs(option, depth-k+1))
         price_tree[[k]] = branch_profits_and_moments$branch_prices
@@ -100,4 +100,27 @@ make_tree = function(option){
 option_profit_from_tree = function(tree){
     # zwraca profit opcji na podstawie której zbudowano drzewo dwumianowe
     return(tree$price_tree[[length(tree$price_tree)]])
+}
+
+plot_tree <- function(option, tree, main){
+  # wyświetla prosty wykres cen o tytule maim, naszego drzewa, dla podanej opcji
+  # wydaje mi się, że warto to przerobić na ggplot2
+  # ogólnie wygląda to ładnie, warto wrzucić kilka takich smaczków do raportu
+  depth <- length(tree$price_tree)
+  max_price <- max(sapply(tree$price_tree, max))
+  plot(
+    0, 
+    tree$price_tree[[depth]], 
+    type="p", 
+    xlim=c(0, option$Time), 
+    ylim=c(0, max_price),
+    main=main,
+    ylab="Price",
+    xlab="Time",
+    pch=tree$moment_tree[[depth]]*15 + 1,
+  )
+  for(k in 2:depth){
+    cat(k, "\n")
+    points(rep((k-1)*option$DeltaT, k), tree$price_tree[[depth-k+1]], pch=tree$moment_tree[[depth-k+1]]*15+1)
+  }
 }
