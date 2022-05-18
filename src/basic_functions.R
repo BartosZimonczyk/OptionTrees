@@ -51,30 +51,30 @@ node_value =function(option, vu, vd, p, node_payoff){
     # liczy profit i "czy sie oplaca" dla danego liscia w drzewie dwumianowym
     # zwraca wektor dwuelementowy, wartość oraz 1 jeśli w tym momencie oplaca sie wykonanie
     # albo 0 jesli sie nie oplaca wykonanie opcji amarykanskiej
-    profit_moment = 0
+    price_moment = 0
     if(option$TypeContinent == 'Europe'){
-        profit = p * vu + (1-p) * vd
+        price = p * vu + (1-p) * vd
     }else if(option$TypeContinent == 'America'){
-        profit = max(p * vu + (1-p) * vd, node_payoff)
-        if(node_payoff > p * vu + (1-p) * vd){
-            profit_moment = 1
+        price = max(p * vu + (1-p) * vd, node_payoff)
+        if(node_payoff >= p * vu + (1-p) * vd){
+            price_moment = 1
         }
     }
-    return(c(profit * exp(-option$r * option$DeltaT), profit_moment))
+    return(c(price * exp(-option$r * option$DeltaT), price_moment))
 }
 
 branch_value = function(option, last_branch, this_branch_payoffs){
     # liczy profity dla tego brancha, na podstawie poprzedniego i payoffow obecnego
     # zwraca liste z wektorem profitow i wektorem momentów opłacalności wykonania
     p = (exp(option$r * option$DeltaT) - option$d) / (option$u - option$d)
-    branch_profits = c()
+    branch_prices = c()
     branch_moments = c()
     for(k in 1:(length(last_branch)-1)){
-        node_profit_and_moment = node_value(option, last_branch[k], last_branch[k+1], p, this_branch_payoffs[k])
-        branch_profits[k] = node_profit_and_moment[1]
-        branch_moments[k] = node_profit_and_moment[2]
+        node_price_and_moment = node_value(option, last_branch[k], last_branch[k+1], p, this_branch_payoffs[k])
+        branch_prices[k] = node_price_and_moment[1]
+        branch_moments[k] = node_price_and_moment[2]
     }
-    return(list('branch_profits'=branch_profits, 'branch_moments'=branch_moments))
+    return(list('branch_prices'=branch_prices, 'branch_moments'=branch_moments))
 }
 
 make_tree = function(option){
@@ -83,20 +83,21 @@ make_tree = function(option){
     # jako drzewo rozumiemy tutaj liste coraz krószych wektorów
     depth = as.integer(option$Time / option$DeltaT)
     moment_tree = list()
-    profit_tree = list()
-    profit_tree[[1]] = branch_payoffs(option, depth)
+    price_tree = list()
+    price_tree[[1]] = branch_payoffs(option, depth)
+    moment_tree[[1]] = rep(1, depth)
     for(k in 2:(depth+1)){
-        branch_profits_and_moments = branch_value(option, profit_tree[[k-1]], branch_payoffs(option, depth-k+1))
-        profit_tree[[k]] = branch_profits_and_moments$branch_profits
-        moment_tree[[k-1]] = branch_profits_and_moments$branch_moments
+        branch_profits_and_moments = branch_value(option, price_tree[[k-1]], branch_payoffs(option, depth-k+1))
+        price_tree[[k]] = branch_profits_and_moments$branch_prices
+        moment_tree[[k]] = branch_profits_and_moments$branch_moments
     }
     return(list(
-        'profit_tree' = profit_tree,
+        'price_tree' = price_tree,
         'moment_tree' = moment_tree
     ))
 }
 
 option_profit_from_tree = function(tree){
     # zwraca profit opcji na podstawie której zbudowano drzewo dwumianowe
-    return(tree$profit_tree[[length(tree$profit_tree)]])
+    return(tree$price_tree[[length(tree$price_tree)]])
 }
