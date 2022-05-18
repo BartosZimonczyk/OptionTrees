@@ -77,7 +77,7 @@ branch_value = function(option, last_branch, this_branch_payoffs){
     return(list('branch_profits'=branch_profits, 'branch_moments'=branch_moments))
 }
 
-tree_value = function(option){
+make_tree = function(option){
     # liczy wartosci drzewa dla modelu dwumianowego dla podanej opcji
     # zwraca drzewo profitów i drzewo momentów opłacalności
     # jako drzewo rozumiemy tutaj liste coraz krószych wektorów
