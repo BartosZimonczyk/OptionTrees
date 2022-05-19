@@ -120,7 +120,6 @@ plot_tree <- function(option, tree, main){
     pch=tree$moment_tree[[depth]]*15 + 1,
   )
   for(k in 2:depth){
-    cat(k, "\n")
     points(rep((k-1)*option$DeltaT, k), tree$price_tree[[depth-k+1]], pch=tree$moment_tree[[depth-k+1]]*15+1)
   }
 }
