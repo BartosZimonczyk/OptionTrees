@@ -1,0 +1,32 @@
+source('src/basic_functions.R')
+
+S0s <- 25:75
+for(k in 1:51){
+  S0 <- S0s[k]
+  option <- make_option(TypeContinent = "America", TypeVerb = "put", S0=S0)
+  tree <- make_tree(option)
+  
+  png(paste("plots/Trees/AmericePutTree_S0", k, ".png", sep=''))
+  plot_tree(option, tree, main="Price of option put, american")
+  dev.off()
+}
+
+Times <- 2:50
+prices <- rep(0, 50)
+S0s <- 25:75
+for(k in 1:51){
+  S0 <- S0s[k]
+  option <- make_option(S0=S0)
+  tree <- make_tree(option)
+  
+  prices[k] <- option_profit_from_tree(tree)
+}
+plot(S0s, prices, type="p", pch=16)
+
+
+
+
+option <- make_option()
+option
+
+make_tree(option)
