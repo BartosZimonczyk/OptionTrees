@@ -10,6 +10,11 @@ t2 <- make_tree(optEurPut)
 t3 <- make_tree(optAmericaCall)
 t4 <- make_tree(optAmericaPut)
 
+option_profit_from_tree(t1)
+option_profit_from_tree(t2)
+option_profit_from_tree(t3)
+option_profit_from_tree(t4)
+
 plot_tree(optEurCall, t1, "Europejska call")
 plot_tree(optEurPut, t2, "Europejska put")
 plot_tree(optAmericaCall, t3, "Amerykańska call")
