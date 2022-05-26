@@ -48,7 +48,7 @@ branch_payoffs = function(option, depth){
 }
 
 node_value =function(option, vu, vd, p, node_payoff){
-    # liczy profit i "czy sie oplaca" dla danego liscia w drzewie dwumianowym
+    # liczy cenę i "czy sie oplaca" dla danego liscia w drzewie dwumianowym
     # zwraca wektor dwuelementowy, wartość oraz 1 jeśli w tym momencie oplaca sie wykonanie
     # albo 0 jesli sie nie oplaca wykonanie opcji amarykanskiej
     price_moment = 0
@@ -64,11 +64,12 @@ node_value =function(option, vu, vd, p, node_payoff){
 }
 
 branch_value = function(option, last_branch, this_branch_payoffs){
-    # liczy profity dla tego brancha, na podstawie poprzedniego i payoffow obecnego
+    # liczy cenę dla tego brancha, na podstawie poprzedniego i payoffow obecnego [dla amerykańskiej]
     # zwraca liste z wektorem profitow i wektorem momentów opłacalności wykonania
     p = (exp(option$r * option$DeltaT) - option$d) / (option$u - option$d)
     branch_prices = c()
     branch_moments = c()
+    # branch_asset_prices = c()
     for(k in 1:(length(last_branch)-1)){
         node_price_and_moment = node_value(option, last_branch[k], last_branch[k+1], p, this_branch_payoffs[k])
         branch_prices[k] = node_price_and_moment[1]
@@ -84,16 +85,21 @@ make_tree = function(option){
     depth = as.integer(option$Time / option$DeltaT)
     moment_tree = list()
     price_tree = list()
+    asset_price_tree = list()
     price_tree[[1]] = branch_payoffs(option, depth)
-    moment_tree[[1]] = rep(0, depth)
+    moment_tree[[1]] = (price_tree[[1]] > 0) * 1 
+    asset_price_tree[[1]] = option$S0 * option$u^(depth:0) * option$d^(0:depth)
     for(k in 2:(depth+1)){
+        asset_price_tree[[k]] = option$S0 * option$u^((depth + 1 -k):0) * option$d^(0:(depth + 1 -k))
         branch_profits_and_moments = branch_value(option, price_tree[[k-1]], branch_payoffs(option, depth-k+1))
         price_tree[[k]] = branch_profits_and_moments$branch_prices
         moment_tree[[k]] = branch_profits_and_moments$branch_moments
+
     }
     return(list(
         'price_tree' = price_tree,
-        'moment_tree' = moment_tree
+        'moment_tree' = moment_tree,
+        'asset_price_tree' = asset_price_tree
     ))
 }
 
@@ -102,24 +108,42 @@ option_profit_from_tree = function(tree){
     return(tree$price_tree[[length(tree$price_tree)]])
 }
 
-plot_tree <- function(option, tree, main){
-  # wyświetla prosty wykres cen o tytule maim, naszego drzewa, dla podanej opcji
-  # wydaje mi się, że warto to przerobić na ggplot2
-  # ogólnie wygląda to ładnie, warto wrzucić kilka takich smaczków do raportu
-  depth <- length(tree$price_tree)
-  max_price <- max(sapply(tree$price_tree, max))
-  plot(
-    0, 
-    tree$price_tree[[depth]], 
-    type="p", 
-    xlim=c(0, option$Time), 
-    ylim=c(0, max_price),
-    main=main,
-    ylab="Price",
-    xlab="Time",
-    pch=tree$moment_tree[[depth]]*15 + 1,
-  )
-  for(k in 2:depth){
-    points(rep((k-1)*option$DeltaT, k), tree$price_tree[[depth-k+1]], pch=tree$moment_tree[[depth-k+1]]*15+1)
-  }
+
+tree_to_df = function(tree, option){
+  prices = unlist(tree$price_tree)
+  asset_prices = unlist(tree$asset_price_tree)
+  moments = unlist(tree$moment_tree)
+  
+  depth = as.integer(option$Time / option$DeltaT)
+  times = unlist(sapply(depth:0, function(k){rep((k)*option$DeltaT, k+1)}))
+  return(data.frame("prices" = prices, "asset_prices" = asset_prices, "moments" = moments, "times" = times))
 }
+
+
+
+# plot_tree <- function(option, tree, main){
+#   # wyświetla prosty wykres cen o tytule main, naszego drzewa, dla podanej opcji
+#   # wydaje mi się, że warto to przerobić na ggplot2
+#   # ogólnie wygląda to ładnie, warto wrzucić kilka takich smaczków do raportu
+#   depth <- length(tree$price_tree)
+#   max_price <- max(sapply(tree$price_tree, max))
+#   plot(
+#     0, 
+#     tree$price_tree[[depth]], 
+#     type="p", 
+#     xlim=c(0, option$Time), 
+#     ylim=c(0, max_price),
+#     main=main,
+#     ylab="Price",
+#     xlab="Time",
+#     pch=tree$moment_tree[[depth]]*15 + 1,
+#   )
+#   for(k in 2:depth){
+#     points(rep((k-1)*option$DeltaT, k), tree$price_tree[[depth-k+1]], pch=tree$moment_tree[[depth-k+1]]*15+1)
+#   }
+# }
+
+
+
+
+
