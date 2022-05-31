@@ -73,7 +73,7 @@ heatmap(heat_matrix_AmericaPut, Rowv=NA, Colv=NA)
 write.csv(heat_matrix_AmericaPut, "simulations/s0_vs_Strike_AmerciaPut_heatmap.csv")
 
 # Sigma vs r
-Sigmas <- seq(0.01, 0.6, by=0.01)
+Sigmas <- seq(0.1, 0.6, by=0.01)
 rs <- seq(0.001, 0.2, by=0.001)
 
 heat_matrix_EurCall <- matrix(nrow=length(rs), ncol=length(Sigmas))
