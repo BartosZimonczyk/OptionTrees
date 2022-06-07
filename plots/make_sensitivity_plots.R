@@ -77,7 +77,7 @@ ggsave("plots/Sensetivity_plots/r.png", g5)
 # wrażliwość na zmianę DeltaT
 
 DeltaTs <- seq(0.01, 1, by=0.001)
-parity <- as.integer(2/DeltaTs) %%2
+parity <- as.integer(2/DeltaTs) %% 2
 
 DeltaT_price_simulation <- read.csv(file='simulations/DeltaT_price_simulation.csv', row.names = 1)
 g6 <-
@@ -91,14 +91,14 @@ g6 <-
 
 ggsave("plots/Sensetivity_plots/deltaT.png", g6)
 
-# g7 <-
-#   ggplot(cbind(DeltaT_price_simulation, parity = parity)[DeltaT_price_simulation$Continent == "America" & DeltaT_price_simulation$Verb=="put", ])+
-#   geom_point(aes(x = DeltaT, y = Price, color = as.factor(parity)), shape = 20, alpha = 1, size = 0.1)+
-#   scale_color_discrete(labels = c("Amerykańskie", "Europejskie"))+
-#   labs(y = "Cena", color = "Parzystość:")+
-#   theme_bw()
-# 
-# ggsave("plots/Sensetivity_plots/deltaT_parity.png", g7)
+g7 <-
+  ggplot(cbind(DeltaT_price_simulation, parity = parity)[DeltaT_price_simulation$Continent == "America" & DeltaT_price_simulation$Verb=="put", ])+
+  geom_point(aes(x = DeltaT, y = Price, color = as.factor(parity)), shape = 20, alpha = 1, size = 0.1)+
+  scale_color_discrete(labels = c("parzyste", "nieparzyste"))+
+  labs(y = "Cena", color = "Parzystość:")+
+  theme_bw()
+
+ggsave("plots/Sensetivity_plots/deltaT_parity.png", g7)
 
 
 # skąd sie bierze parzyste nieparzyste -> 

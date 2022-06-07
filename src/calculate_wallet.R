@@ -144,20 +144,30 @@ plot_tree_wallet <- function(option, tree, wallet, main = "", max_price = NULL, 
                aes(x = times, y = asset_prices, color = cash_loans, shape = as.factor(moments)))+
     scale_shape_manual(values = c(2, 16)) +
     scale_color_viridis_c() +
-    ggtitle(paste(option$TypeContinent, option$TypeVerb," - cash/loan")) +
+    labs(y = "cena aktywa bazowego", x = "czas", color = "gotówka/pożyczka", shape = "Czy zrealizowac")+
     theme_bw()
+  
   
   graph2 <- ggplot()+
     geom_point(data = wallet_df,
                aes(x = times, y = asset_prices, color = stocks, shape = as.factor(moments)))+
     scale_shape_manual(values = c(2, 16)) +
     scale_color_viridis_c() +
-    ggtitle(paste(option$TypeContinent, option$TypeVerb, ' - stocks')) +
+    labs(y = "cena aktywa bazowego", x = "czas", color = "aktywo bazowe", shape = "Czy zrealizowac")+
     theme_bw()
   
   if (log_y){
     graph1 <- graph1 + scale_y_continuous(trans = "log")
     graph2 <- graph2 + scale_y_continuous(trans = "log")
+  }
+  
+  if (option$TypeContinent == "America"){
+    graph1 <- graph1 + ggtitle(paste("Opcja Amerykańska", option$TypeVerb," - gotówka/pożyczka"))
+    graph2 <- graph2 + ggtitle(paste("Opcja Amerykańska", option$TypeVerb, ' - aktywo bazowe'))
+  }else{
+    graph1 <- graph1 + ggtitle(paste("Opcja Europejska", option$TypeVerb," - gotówka/pożyczka"))
+    graph2 <- graph2 + ggtitle(paste("Opcja Europejska", option$TypeVerb, ' - aktywo bazowe'))
+    
   }
   
   out <- list(graph1,graph2)

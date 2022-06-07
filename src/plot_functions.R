@@ -22,7 +22,10 @@ plot_tree <- function(option, tree, main = " ", max_price = NULL, max_asset_pric
                aes(x = times, y = asset_prices, color = prices, shape = as.factor(moments)))+
     scale_shape_manual(values = c(2, 16)) +
     scale_color_viridis_c() +
-    theme_bw()
+    theme_bw()+
+    guides(color = guide_colorbar(order = 1),shape = guide_legend(order = 2))+
+    labs(y = "cena aktywa bazowego", x = "czas", color = "cena", shape = "Czy zrealizowac")+
+    scale_x_continuous(breaks = seq(0,2,0.5))
   
   if (log_y){
     graph <- graph + scale_y_continuous(trans = "log")

@@ -178,6 +178,8 @@ price_EurCall <- rep(0, length(DeltaTs))
 price_EurPut <- rep(0, length(DeltaTs))
 price_AmericaCall <- rep(0, length(DeltaTs))
 price_AmericaPut <- rep(0, length(DeltaTs))
+parity <- as.integer(2/DeltaTs) %%2
+
 
 for(k in 1:length(DeltaTs)){
   cat(k, '...\n')
@@ -201,7 +203,8 @@ output <- data.frame(
   'DeltaT'=rep(DeltaTs, DeltaTs=4),
   'Price'=c(price_EurCall, price_EurPut, price_AmericaCall, price_AmericaPut),
   'Continent'=c(rep('Europe', times=2*length(DeltaTs)), rep('America', times=2*length(DeltaTs))),
-  'Verb'=c(rep('call', times=length(DeltaTs)), rep('put', times=length(DeltaTs)), rep('call', times=length(DeltaTs)), rep('put', times=length(DeltaTs)))
+  'Verb'=c(rep('call', times=length(DeltaTs)), rep('put', times=length(DeltaTs)), rep('call', times=length(DeltaTs)), rep('put', times=length(DeltaTs))),
+  'parity' = rep(parity,4)
 )
 
 write.csv(output, file='simulations/DeltaT_price_simulation.csv')
